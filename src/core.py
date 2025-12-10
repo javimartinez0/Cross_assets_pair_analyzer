@@ -1,6 +1,7 @@
 import yfinance as yf
 import pandas as pd
-from pathlib import Path  
+from pathlib import Path
+import numpy as np
 
 # Funcion reutilizable para descargar y guardar datos de yfinance
 
@@ -11,6 +12,7 @@ def download_data(tickers, start, end, interval="1d", save_path="data/raw/prices
     return df
 
 # Funcion para cargar y preparar los precios de cierre 
+
 def load_and_prepare_closes(path="data/raw/prices.csv", preferred_fields=("Close", "Adj Close", "Price")):
     try:
         df = pd.read_csv(path, header=[0, 1], index_col=0, parse_dates=True)
@@ -36,3 +38,8 @@ def load_and_prepare_closes(path="data/raw/prices.csv", preferred_fields=("Close
     closes = closes.dropna(how="all").ffill().dropna()
     return closes
 
+#Función para calcular retornos logaritmicos diarios
+
+def compute_log_returns(closes: pd.DataFrame) -> pd.DataFrame:
+    rets = np.log(closes / closes.shift(1))
+    return rets.dropna()
