@@ -43,3 +43,19 @@ def load_and_prepare_closes(path="data/raw/prices.csv", preferred_fields=("Close
 def compute_log_returns(closes: pd.DataFrame) -> pd.DataFrame:
     rets = np.log(closes / closes.shift(1))
     return rets.dropna()
+
+#Funcion para crear las dos correlaciones moviles
+
+def rolling_correlation_dual(returns, asset_x, asset_y, window_short=30, window_long=90):
+   
+    pair = returns[[asset_x, asset_y]].dropna()
+
+    corr_short = pair[asset_x].rolling(window_short).corr(pair[asset_y])
+    corr_long = pair[asset_x].rolling(window_long).corr(pair[asset_y])
+
+    result = pd.DataFrame({
+        f'corr_{window_short}': corr_short,
+        f'corr_{window_long}': corr_long
+    })
+
+    return result
