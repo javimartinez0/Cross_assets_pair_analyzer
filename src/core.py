@@ -46,16 +46,49 @@ def compute_log_returns(closes: pd.DataFrame) -> pd.DataFrame:
 
 #Funcion para crear las dos correlaciones moviles
 
-def rolling_correlation_dual(returns, asset_x, asset_y, window_short=30, window_long=90):
+def rolling_correlation_dual(returns, asset_x, asset_y, window_short=30, window_medium=90, window_long = 180):
    
     pair = returns[[asset_x, asset_y]].dropna()
 
     corr_short = pair[asset_x].rolling(window_short).corr(pair[asset_y])
+    corr_medium = pair[asset_x].rolling(window_medium).corr(pair[asset_y])
     corr_long = pair[asset_x].rolling(window_long).corr(pair[asset_y])
-
+    
     result = pd.DataFrame({
         f'corr_{window_short}': corr_short,
+        f'corr_{window_medium}' : corr_medium,
         f'corr_{window_long}': corr_long
     })
 
     return result
+
+#Funcion para pasar a log_precios, calcular la beta y el spread de los dos activos
+
+def compute_log_prices(closes: pd.DataFrame) -> pd.DataFrame:
+    return np.log(closes)
+
+def compute_spread(
+    log_prices: pd.DataFrame,
+    asset_y: str,
+    asset_x: str,
+    use_returns: bool = True,
+) -> tuple[pd.Series, float]:
+
+    # Nos quedamos solo con las dos columnas de interés
+    data = log_prices[[asset_y, asset_x]].dropna()
+
+    # 1) Calculamos la beta
+    if use_returns:
+        # Retornos logarítmicos (diferencias de log-precios)
+        rets = data.diff().dropna()
+    else:
+        # Usar directamente los log-precios
+        rets = data
+
+    cov = rets.cov()
+    beta = cov.loc[asset_y, asset_x] / cov.loc[asset_x, asset_x]
+
+    # 2) Calculamos el spread usando esa beta
+    spread = data[asset_y] - beta * data[asset_x]
+
+    return spread, beta
