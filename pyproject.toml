@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pairs-spread-analysis"
+version = "0.1.0"
+description = "Pairs/spread analysis utilities (Kalman hedge ratio, adaptive z-score) for research notebooks."
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+research = [
+  "statsmodels>=0.14",
+  "yfinance>=0.2",
+  "ipykernel>=6.0",
+]
+
+[tool.setuptools]
+# The package is named `src` to match `import src.core as core`.
+packages = ["src"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.black]
+line-length = 100
