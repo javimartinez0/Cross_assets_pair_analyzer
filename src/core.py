@@ -92,3 +92,11 @@ def compute_spread(
     spread = data[asset_y] - beta * data[asset_x]
 
     return spread, beta
+
+#z-score del spread
+
+def rolling_zscore(series, window):
+    mean = series.rolling(window).mean()
+    std = series.rolling(window).std()
+    z = (series - mean) / std
+    return z
