@@ -92,7 +92,7 @@ Cross_assets_pair_analyzer
 │   └── analysis_pairs.ipynb
 ├── scripts/
 │   └── download_data.py
-└── assets/
+└── Output/
     ├── beta_spread.png
     └── zscore.png
 ```
