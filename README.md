@@ -66,8 +66,8 @@ Event statistics include:
 
 ## Results snapshot (example from the notebook)
 
-![alt text](image-3.png)
-![alt text](image-4.png)
+![spread and beta](Output/Spread_and_beta.png)
+![z_score](Output/z_score.png.png)
 
 
 - **Stationarity**: ADF strongly rejects unit root; KPSS does not reject stationarity.
