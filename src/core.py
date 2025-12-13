@@ -338,3 +338,96 @@ def kpss_test(series: pd.Series, regression: str = "c", nlags: str = "auto") -> 
     s = series.dropna().to_numpy(dtype=float)
     stat, pval, *_ = kpss(s, regression=regression, nlags=nlags)
     return {"kpss_stat": float(stat), "pvalue": float(pval)}
+
+
+def autocorr_lags(series, lags=(1,2,5,10,20,60)):
+    """Autocorrelation at specified lags."""
+    s = series.dropna()
+    return {lag: float(s.autocorr(lag)) for lag in lags}
+
+
+def zscore_events(z, entry=2.0, exit=0.5):
+    """
+    Parse z-score into discrete events.
+    An event starts when z crosses beyond +/- entry.
+    It ends when |z| goes back below exit.
+
+    Returns a DataFrame with per-event stats.
+    """
+    z = z.dropna().copy()
+
+    state = 0  # 0=flat, +1=short-spread (z>entry), -1=long-spread (z<-entry)
+    start_t = None
+    start_z = None
+    peak_z = None
+
+    events = []
+
+    for t, val in z.items():
+        if state == 0:
+            if val >= entry:
+                state = +1
+                start_t = t
+                start_z = val
+                peak_z = val
+            elif val <= -entry:
+                state = -1
+                start_t = t
+                start_z = val
+                peak_z = val
+
+        else:
+            # track extremum while in event
+            if state == +1:
+                peak_z = max(peak_z, val)
+            else:
+                peak_z = min(peak_z, val)
+
+            # exit condition
+            if abs(val) <= exit:
+                end_t = t
+                duration = (z.index.get_loc(end_t) - z.index.get_loc(start_t))
+                events.append({
+                    "side": "SHORT" if state == +1 else "LONG",
+                    "start": start_t,
+                    "end": end_t,
+                    "duration_bars": int(duration),
+                    "z_start": float(start_z),
+                    "z_peak": float(peak_z),
+                    "z_end": float(val),
+                })
+                state = 0
+                start_t = None
+                start_z = None
+                peak_z = None
+
+    return pd.DataFrame(events)
+
+def event_summary(events_df, z, entry=2.0):
+    """
+    Compute frequency (how often) and duration stats.
+    """
+    n_bars = z.dropna().shape[0]
+    n_events = len(events_df)
+
+    out = {}
+    out["bars"] = int(n_bars)
+    out["events"] = int(n_events)
+    out["events_per_1000_bars"] = float(n_events / n_bars * 1000) if n_bars else np.nan
+
+    # % time beyond entry threshold (how often signal is extreme)
+    out["pct_time_abs_z_gt_entry"] = float((z.dropna().abs() > entry).mean() * 100)
+
+    if n_events:
+        out["duration_mean"] = float(events_df["duration_bars"].mean())
+        out["duration_median"] = float(events_df["duration_bars"].median())
+        out["duration_p90"] = float(events_df["duration_bars"].quantile(0.90))
+
+        out["count_LONG"] = int((events_df["side"] == "LONG").sum())
+        out["count_SHORT"] = int((events_df["side"] == "SHORT").sum())
+
+    return out
+
+
+
+
