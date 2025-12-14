@@ -1,5 +1,3 @@
-
-```md
 # PROJECT_BRIEF — BTC–QQQ Pairs / Spread Analysis
 
 ## Goal
