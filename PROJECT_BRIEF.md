@@ -59,7 +59,7 @@ Validate spread behavior with:
 - Mean reversion is fast (half-life on the order of ~1–2 daily bars).
 - Extreme z-score events occur at a moderate frequency and typically resolve within a few bars (parameter-dependent).
 
-- These conclusions suggest that the model could be profitable in practice, as it fulfils the main requirements for a mean reversion strategy based on the spread. 
+- **These conclusions suggest that the model could be profitable in practice, as it fulfils the main requirements for a mean reversion strategy based on the spread**. 
 
 ## What this project demonstrates
 
